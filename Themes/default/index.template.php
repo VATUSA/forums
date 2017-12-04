@@ -218,6 +218,32 @@ function template_body_above()
 				</ul>';
 	}
 	// Otherwise they're a guest - this time ask them to either register or login - lazy bums...
+	elseif (!empty($context['show_login_bar']))
+	{
+		echo '
+				<script type="text/javascript" src="', $settings['default_theme_url'], '/scripts/sha1.js"></script>
+				<form id="guest_form" action="', $scripturl, '?action=login2" method="post" accept-charset="', $context['character_set'], '" ', empty($context['disable_login_hashing']) ? ' onsubmit="hashLoginPassword(this, \'' . $context['session_id'] . '\');"' : '', '>
+					<div class="info">', sprintf($txt['welcome_guest'], $txt['guest_title']), '</div>
+					<input type="text" name="user" size="10" class="input_text" />
+					<input type="password" name="passwrd" size="10" class="input_password" />
+					<select name="cookielength">
+						<option value="60">', $txt['one_hour'], '</option>
+						<option value="1440">', $txt['one_day'], '</option>
+						<option value="10080">', $txt['one_week'], '</option>
+						<option value="43200">', $txt['one_month'], '</option>
+						<option value="-1" selected="selected">', $txt['forever'], '</option>
+					</select>
+					<input type="submit" value="', $txt['login'], '" class="button_submit" /><br />
+					<div class="info">', $txt['quick_login_dec'], '</div>';
+
+		if (!empty($modSettings['enableOpenID']))
+			echo '
+					<br /><input type="text" name="openid_identifier" id="openid_url" size="25" class="input_text openid_login" />';
+
+		echo '
+					<input type="hidden" name="hash_passwrd" value="" /><input type="hidden" name="', $context['session_var'], '" value="', $context['session_id'], '" />
+				</form>';
+	}
 
 	echo '
 			</div>
@@ -237,6 +263,12 @@ function template_body_above()
 					<input type="hidden" name="brd[', $context['current_board'], ']" value="', $context['current_board'], '" />';
 
 	echo '</form>';
+
+	// Show a random news item? (or you could pick one from news_lines...)
+	if (!empty($settings['enable_news']))
+		echo '
+				<h2>', $txt['news'], ': </h2>
+				<p>', $context['random_news_line'], '</p>';
 
 	echo '
 			</div>
@@ -389,7 +421,7 @@ function template_menu()
 					<a class="', $button['active_button'] ? 'active ' : '', 'firstlevel" href="', $button['href'], '"', isset($button['target']) ? ' target="' . $button['target'] . '"' : '', '>
 						<span class="', isset($button['is_last']) ? 'last ' : '', 'firstlevel">', $button['title'], '</span>
 					</a>';
-		if (isset($button['sub_buttons']))
+		if (!empty($button['sub_buttons']))
 		{
 			echo '
 					<ul>';
@@ -402,7 +434,7 @@ function template_menu()
 								<span', isset($childbutton['is_last']) ? ' class="last"' : '', '>', $childbutton['title'], !empty($childbutton['sub_buttons']) ? '...' : '', '</span>
 							</a>';
 				// 3rd level menus :)
-				if (isset($childbutton['sub_buttons']))
+				if (!empty($childbutton['sub_buttons']))
 				{
 					echo '
 							<ul>';

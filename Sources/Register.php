@@ -611,8 +611,6 @@ function Activate()
 			)
 		);
 		// !!! Separate the sprintf?
-/*		if ($smcFunc['db_num_rows']($request) != 0)
-			fatal_lang_error('email_in_use', false, array(htmlspecialchars($_POST['new_email'])));*/
 		$smcFunc['db_free_result']($request);
 
 		updateMemberData($row['id_member'], array('email_address' => $_POST['new_email']));
@@ -870,4 +868,3 @@ function RegisterCheckUsername()
 	}
 }
 
-?>

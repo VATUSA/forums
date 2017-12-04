@@ -2824,13 +2824,13 @@ function template_profile_theme_pick()
 {
 	global $txt, $context, $scripturl;
 
-	/*echo '
+	echo '
 							<dt>
 								<strong>', $txt['current_theme'], ':</strong>
 							</dt>
 							<dd>
 								', $context['member']['theme']['name'], ' <a href="', $scripturl, '?action=theme;sa=pick;u=', $context['id_member'], ';', $context['session_var'], '=', $context['session_id'], '">', $txt['change'], '</a>
-							</dd>';*/
+							</dd>';
 }
 
 // Smiley set picker.
@@ -2882,6 +2882,22 @@ function template_authentication_method()
 								</dt>
 								<dd>
 									<input type="text" name="openid_identifier" id="openid_url" size="30" tabindex="', $context['tabindex']++, '" value="', $context['member']['openid_uri'], '" class="input_text openid_login" />
+								</dd>
+							</dl>
+							<dl id="auth_pass_div">
+								<dt>
+									<em>', $txt['choose_pass'], ':</em>
+								</dt>
+								<dd>
+									<input type="password" name="passwrd1" id="smf_autov_pwmain" size="30" tabindex="', $context['tabindex']++, '" class="input_password" />
+									<span id="smf_autov_pwmain_div" style="display: none;"><img id="smf_autov_pwmain_img" src="', $settings['images_url'], '/icons/field_invalid.gif" alt="*" /></span>
+								</dd>
+								<dt>
+									<em>', $txt['verify_pass'], ':</em>
+								</dt>
+								<dd>
+									<input type="password" name="passwrd2" id="smf_autov_pwverify" size="30" tabindex="', $context['tabindex']++, '" class="input_password" />
+									<span id="smf_autov_pwverify_div" style="display: none;"><img id="smf_autov_pwverify_img" src="', $settings['images_url'], '/icons/field_valid.gif" alt="*" /></span>
 								</dd>
 							</dl>
 						</dd>

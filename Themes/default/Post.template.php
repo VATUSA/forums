@@ -428,6 +428,7 @@ function template_main()
 							', $context['can_sticky'] ? '<li><input type="hidden" name="sticky" value="0" /><label for="check_sticky"><input type="checkbox" name="sticky" id="check_sticky"' . ($context['sticky'] ? ' checked="checked"' : '') . ' value="1" class="input_check" /> ' . $txt['sticky_after'] . '</label></li>' : '', '
 							<li><label for="check_smileys"><input type="checkbox" name="ns" id="check_smileys"', $context['use_smileys'] ? '' : ' checked="checked"', ' value="NS" class="input_check" /> ', $txt['dont_use_smileys'], '</label></li>', '
 							', $context['can_move'] ? '<li><input type="hidden" name="move" value="0" /><label for="check_move"><input type="checkbox" name="move" id="check_move" value="1" class="input_check" ' . (!empty($context['move']) ? 'checked="checked" ' : '') . '/> ' . $txt['move_after2'] . '</label></li>' : '', '
+							', $context['can_announce'] && $context['is_first_post'] ? '<li><label for="check_announce"><input type="checkbox" name="announce_topic" id="check_announce" value="1" class="input_check" ' . (!empty($context['announce']) ? 'checked="checked" ' : '') . '/> ' . $txt['announce_topic'] . '</label></li>' : '', '
 							', $context['show_approval'] ? '<li><label for="approve"><input type="checkbox" name="approve" id="approve" value="2" class="input_check" ' . ($context['show_approval'] === 2 ? 'checked="checked"' : '') . ' /> ' . $txt['approve_this_post'] . '</label></li>' : '', '
 						</ul>
 					</div>';
@@ -582,7 +583,7 @@ function template_main()
 					}
 					// !!! Currently not sending poll options and option checkboxes.
 					var x = new Array();
-					var textFields = [\'subject\', ', JavaScriptEscape($context['post_box_name']), ', \'icon\', \'guestname\', \'email\', \'evtitle\', \'question\', \'topic\', ', JavaScriptEscape($context['session_var']), ';
+					var textFields = [\'subject\', ', JavaScriptEscape($context['post_box_name']), ', \'icon\', \'guestname\', \'email\', \'evtitle\', \'question\', \'topic\', ', JavaScriptEscape($context['session_var']), '];
 					var numericFields = [
 						\'board\', \'topic\', \'last_msg\',
 						\'eventid\', \'calendar\', \'year\', \'month\', \'day\',
@@ -1002,7 +1003,6 @@ function template_quotefast()
 function template_announce()
 {
 	global $context, $settings, $options, $txt, $scripturl;
-	return;
 
 	echo '
 	<div id="announcement">
@@ -1080,7 +1080,6 @@ function template_announcement_send()
 
 			function doAutoSubmit()
 			{
-				return;
 				if (countdown == 0)
 					document.forms.autoSubmit.submit();
 				else if (countdown == -1)

@@ -3787,9 +3787,6 @@ function text2words($text, $max_chars = 20, $encrypt = false)
 {
 	global $smcFunc, $context;
 
-	if (!isset($context['utf8'])) { $context['utf8'] = true; }
-	if (!isset($context['server']['complex_preg_chars'])) { $context['server']['complex_preg_chars'] = true; }
-
 	// Step 1: Remove entities/things we don't consider words:
 	$words = preg_replace('~(?:[\x0B\0' . ($context['utf8'] ? ($context['server']['complex_preg_chars'] ? '\x{A0}' : "\xC2\xA0") : '\xA0') . '\t\r\s\n(){}\\[\\]<>!@$%^*.,:+=`\~\?/\\\\]+|&(?:amp|lt|gt|quot);)+~' . ($context['utf8'] ? 'u' : ''), ' ', strtr($text, array('<br />' => ' ')));
 
@@ -4511,7 +4508,7 @@ function safe_serialize($value)
  */
 function _safe_unserialize($str)
 {
-		// Input  is not a string.
+	// Input  is not a string.
 	if(empty($str) || !is_string($str))
 		return false;
 
@@ -4557,7 +4554,7 @@ function _safe_unserialize($str)
 			$value = substr($matches[2], 0, (int)$matches[1]);
 			$str = substr($matches[2], (int)$matches[1] + 2);
 		}
-		else if($type == 'a' && preg_match('/^a:([0-9]+):{(.*)/s', $str, $matches) && $matches[1] < 256)
+		else if($type == 'a' && preg_match('/^a:([0-9]+):{(.*)/s', $str, $matches))
 		{
 			$expectedLength = (int)$matches[1];
 			$str = $matches[2];
@@ -4572,7 +4569,6 @@ function _safe_unserialize($str)
 			case 3: // In array, expecting value or another array.
 				if($type == 'a')
 				{
-
 					$stack[] = &$list;
 					$list[$key] = array();
 					$list = &$list[$key];
@@ -4628,7 +4624,6 @@ function _safe_unserialize($str)
 			case 0:
 				if($type == 'a')
 				{
-
 					$data = array();
 					$list = &$data;
 					$expected[] = $expectedLength;

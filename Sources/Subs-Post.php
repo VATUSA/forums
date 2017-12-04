@@ -1739,7 +1739,7 @@ function createPost(&$msgOptions, &$topicOptions, &$posterOptions)
 	$posterOptions['ip'] = empty($posterOptions['ip']) ? $user_info['ip'] : $posterOptions['ip'];
 
 	// We need to know if the topic is approved. If we're told that's great - if not find out.
-	if (!isset($modSettings['postmod_active']) || !$modSettings['postmod_active'])
+	if (!$modSettings['postmod_active'])
 		$topicOptions['is_approved'] = true;
 	elseif (!empty($topicOptions['id']) && !isset($topicOptions['is_approved']))
 	{
