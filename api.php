@@ -15,12 +15,7 @@ if ($_REQUEST['login'] == 1) {
 
   smfapi_logout();
   smfapi_login($data['cid']);
-
-  $fp = fopen("log","a");
-  fputs($fp, $data['cid'] . "\n");
-  fclose($fp);
-
-  sleep(1);
+  
   header("Location: " . $data['return']);
 } elseif ($_REQUEST['logout'] == 1) {
   smfapi_logout();
