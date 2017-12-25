@@ -5,7 +5,7 @@ require("./smf_2_api.php");
 if ($_REQUEST['login'] == 1) {
   $token = $_REQUEST['token'];
   $signature = $_REQUEST['signature'];
-  if ($signature != base64url_encode(hash_hmac("sha512", $signature, base64_decode(file_get_contents("/home/vatusa/forum.key"))))) {
+  if ($signature != base64url_encode(hash_hmac("sha512", $token, base64_decode(file_get_contents("/home/vatusa/forum.key"))))) {
     echo "Bad token\n"; exit;
   }
 
@@ -17,6 +17,36 @@ if ($_REQUEST['login'] == 1) {
   smfapi_login($data['cid']);
 
   header("Location: " . $data['return']);
+} elseif ($_REQUEST['register'] == 1) {
+  $data = $_REQUEST['data'];
+  $signature = $_REQUEST['signature'];
+
+  if ($signature != base64url_encode(hash_hmac("sha512", $data, base64_decode(file_get_contents("/home/vatusa/forum.key"))))) {
+    echo "Bad data\n"; exit;
+  }
+
+  $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
+  $pass = [];
+  $alphaLength = strlen($alphabet) - 1;
+  for ($i = 0; $i < $length; $i++) {
+    $n = rand(0, $alphaLength);
+    $pass[] = $alphabet[$n];
+  }
+  $pass = implode($pass);
+
+  $data = json_decode(base64url_decode($data), true);
+  $data['password'] = $pass;
+  $data['password_check'] = $pass;
+
+  $r = smfapi_registerMember($data);
+  if (is_array($r) || $r == false) {
+    echo "Failed to create new user: " . base64_encode(serialize($r)) . ", " . base64_encode(serialize($data));
+    exit;
+  }
+
+  echo "OK"; exit;
+} else {
+  echo "Unknown request.\n";
 }
 
 function base64url_decode($data) {
