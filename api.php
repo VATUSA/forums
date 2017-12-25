@@ -1,6 +1,5 @@
 <?php
-
-require("./smf_2_api.php");
+require("smf_2_api.php");
 
 if ($_REQUEST['login'] == 1) {
   $token = $_REQUEST['token'];
@@ -10,13 +9,22 @@ if ($_REQUEST['login'] == 1) {
   }
 
   $data = json_decode(base64url_decode($token), true);
-  if (!$data['nlt'] || $data['nlt'] > time()) {
+  if (!$data['nlt'] || $data['nlt'] < time()) {
     echo "Expired token\n"; exit;
   }
 
+  smfapi_logout();
   smfapi_login($data['cid']);
 
+  $fp = fopen("log","a");
+  fputs($fp, $data['cid'] . "\n");
+  fclose($fp);
+
+  sleep(1);
   header("Location: " . $data['return']);
+} elseif ($_REQUEST['logout'] == 1) {
+  smfapi_logout();
+  header("Location: " . $_REQUEST['return']);
 } elseif ($_REQUEST['register'] == 1) {
   $data = $_REQUEST['data'];
   $signature = $_REQUEST['signature'];
