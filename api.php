@@ -31,7 +31,7 @@ if ($_REQUEST['login'] == 1) {
   $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890';
   $pass = [];
   $alphaLength = strlen($alphabet) - 1;
-  for ($i = 0; $i < $length; $i++) {
+  for ($i = 0; $i < 32; $i++) {
     $n = rand(0, $alphaLength);
     $pass[] = $alphabet[$n];
   }
