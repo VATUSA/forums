@@ -2,3 +2,4 @@ attachments/*
 cache/*
 upgrade*
 Settings.php
+.idea
