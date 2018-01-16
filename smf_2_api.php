@@ -1472,9 +1472,9 @@ function smfapi_registerMember($regOptions)
 		    $reg_errors[] = 'email invalid';
     }
 
-    if (false !== smfapi_getUserbyEmail($regOptions['email'])) {
-        $reg_errors[] = 'email already in use';
-    }
+    //if (false !== smfapi_getUserbyEmail($regOptions['email'])) {
+    //    $reg_errors[] = 'email already in use';
+    //}
 
 	// generate a validation code if it's supposed to be emailed
 	// unless there was one passed in for us to use
