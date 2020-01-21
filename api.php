@@ -13,7 +13,6 @@ if ($_REQUEST['login'] == 1) {
     echo "Expired token\n"; exit;
   }
 
-  smfapi_logout();
   smfapi_login($data['cid']);
   
   header("Location: " . $data['return']);

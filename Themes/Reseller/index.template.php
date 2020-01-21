@@ -282,8 +282,8 @@ function template_body_below()
 						echo'
 					</div> 
 					<div class="col-lg-12">
-						&copy; 2015 VATUSA.  All rights reserved.' ,'
- 					</div>';
+						&copy; '. date('Y'). ' VATUSA.  All rights reserved.' ,'
+					 </div>';
 				echo '
 				</div>
 			</div>
@@ -295,6 +295,15 @@ function template_html_below()
 	global $context, $settings, $options, $scripturl, $txt, $modSettings;
 
 	echo '
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-112506058-2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag("js", new Date());
+
+  gtag("config", "UA-112506058-2");
+</script>
 </body></html>';
 }
 
@@ -410,8 +419,8 @@ function template_button_strip($button_strip, $direction = 'top', $strip_options
 	echo '
 		<div class="btn-group', !empty($direction) ? ' navbar-' . $direction : '', '"', (empty($buttons) ? ' style="display: none;"' : ''), (!empty($strip_options['id']) ? ' id="' . $strip_options['id'] . '"': ''), '>
 			<button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
-    			' . $text . ' <i class="caret"></i>
-  			</button>
+				 ' . $text . ' <i class="caret"></i>
+			  </button>
 			<ul class="dropdown-menu" role="menu">',
 				implode('', $buttons), '
 			</ul>
