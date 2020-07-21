@@ -223,6 +223,7 @@ function template_body_above()
 				echo'
 					<ul class="reset">
 						<li class="user">', $context['user']['name'], '</li>
+						<li><a href="', $scripturl, '?action=profile">My Profile</a></li>
 						<li><a href="', $scripturl, '?action=unread">', $txt['unread_topics_visit'], '</a></li>
 						<li><a href="', $scripturl, '?action=unreadreplies">', $txt['unread_replies'], '</a></li>
 					</ul>';
@@ -281,7 +282,7 @@ function template_body_below()
 							<a href="', !empty($settings['rss_text']) ? $settings['rss_text'] : $scripturl .'?action=.xml;type=rss' ,'"><img src="', $settings['images_url'], '/social_icons/rss.png" alt="', $txt['rs_rss'], '" /></a>';
 						echo'
 					</div> 
-					<div class="col-lg-12">
+					<div class="col-lg-12" style="color: #fff;">
 						&copy; '. date('Y'). ' VATUSA.  All rights reserved.' ,'
 					 </div>';
 				echo '
