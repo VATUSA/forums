@@ -282,9 +282,8 @@ function template_body_below()
 						echo'
 					</div> 
 					<div class="col-lg-12">
-						&copy; '. date('Y'). ' VATUSA.  All rights reserved.' ,'
-					 </div>';
-				echo '
+						&copy; '. date('Y'). ' VATUSA.  All rights reserved.
+				
 				</div>
 			</div>
 		</footer>';
