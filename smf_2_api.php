@@ -558,14 +558,6 @@ if (function_exists('set_magic_quotes_runtime')) {
 
 $time_start = microtime();
 
-if (!isset($_SERVER['HTTP_USER_AGENT'])) {
-	$_SERVER['HTTP_USER_AGENT'] = $_SERVER['REMOTE_HOST'];
-}
-
-if (!isset($_SESSION['USER_AGENT'])) {
-	$_SESSION['USER_AGENT'] = $_SERVER['HTTP_USER_AGENT'];
-}
-
 // Without visiting the forum this session variable might not be set on submit.
 if (!isset($_SESSION['USER_AGENT'])) {
 	$_SESSION['USER_AGENT'] = $_SERVER['HTTP_USER_AGENT'];
@@ -862,11 +854,13 @@ function smfapi_login($username='', $cookieLength=525600)
 
     if (!$user_data || empty($user_data)) {
         return false;
+
     }
 
+	$password = sha1($user_data['passwd'] . $user_data['password_salt']);
+
 	// cookie set, session too
-	smfapi_setLoginCookie(60 * $cookieLength, $user_data['id_member'], sha1($user_data['passwd']
-                   . $user_data['password_salt']));
+	smfapi_setLoginCookie(60 * $cookieLength, $user_data['id_member'], $password);
 
 	// you've logged in, haven't you?
 	smfapi_updateMemberData($user_data['id_member'], array('last_login' => time(), 'member_ip' => $user_info['ip']));
@@ -1472,9 +1466,9 @@ function smfapi_registerMember($regOptions)
 		    $reg_errors[] = 'email invalid';
     }
 
-    //if (false !== smfapi_getUserbyEmail($regOptions['email'])) {
-    //    $reg_errors[] = 'email already in use';
-    //}
+    if (false !== smfapi_getUserbyEmail($regOptions['email'])) {
+        $reg_errors[] = 'email already in use';
+    }
 
 	// generate a validation code if it's supposed to be emailed
 	// unless there was one passed in for us to use
@@ -1800,6 +1794,76 @@ function smfapi_reloadSettings()
 	// preg_replace can handle complex characters only for higher PHP versions.
 	$space_chars = $utf8 ? (@version_compare(PHP_VERSION, '4.3.3') != -1 ? '\x{A0}\x{AD}\x{2000}-\x{200F}\x{201F}\x{202F}\x{3000}\x{FEFF}' : "\xC2\xA0\xC2\xAD\xE2\x80\x80-\xE2\x80\x8F\xE2\x80\x9F\xE2\x80\xAF\xE2\x80\x9F\xE3\x80\x80\xEF\xBB\xBF") : '\x00-\x08\x0B\x0C\x0E-\x19\xA0';
 
+	$smcFunc += array(
+		'entity_fix' => create_function('$string', '
+			$num = substr($string, 0, 1) === \'x\' ? hexdec(substr($string, 1)) : (int) $string;
+			return $num < 0x20 || $num > 0x10FFFF || ($num >= 0xD800 && $num <= 0xDFFF) || $num == 0x202E ? \'\' : \'&#\' . $num . \';\';'),
+		'htmlspecialchars' => create_function('$string, $quote_style = ENT_COMPAT, $charset = \'ISO-8859-1\'', '
+			global $smcFunc;
+			return ' . strtr($ent_check[0], array('&' => '&amp;')) . 'htmlspecialchars($string, $quote_style, ' . ($utf8 ? '\'UTF-8\'' : '$charset') . ')' . $ent_check[1] . ';'),
+		'htmltrim' => create_function('$string', '
+			global $smcFunc;
+			return preg_replace(\'~^(?:[ \t\n\r\x0B\x00' . $space_chars . ']|&nbsp;)+|(?:[ \t\n\r\x0B\x00' . $space_chars . ']|&nbsp;)+$~' . ($utf8 ? 'u' : '') . '\', \'\', ' . implode('$string', $ent_check) . ');'),
+		'strlen' => create_function('$string', '
+			global $smcFunc;
+			return strlen(preg_replace(\'~' . $ent_list . ($utf8 ? '|.~u' : '~') . '\', \'_\', ' . implode('$string', $ent_check) . '));'),
+		'strpos' => create_function('$haystack, $needle, $offset = 0', '
+			global $smcFunc;
+			$haystack_arr = preg_split(\'~(&#' . (empty($modSettings['disableEntityCheck']) ? '\d{1,7}' : '021') . ';|&quot;|&amp;|&lt;|&gt;|&nbsp;|.)~' . ($utf8 ? 'u' : '') . '\', ' . implode('$haystack', $ent_check) . ', -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+			$haystack_size = count($haystack_arr);
+			if (strlen($needle) === 1)
+			{
+				$result = array_search($needle, array_slice($haystack_arr, $offset));
+				return is_int($result) ? $result + $offset : false;
+			}
+			else
+			{
+				$needle_arr = preg_split(\'~(&#' . (empty($modSettings['disableEntityCheck']) ? '\d{1,7}' : '021') . ';|&quot;|&amp;|&lt;|&gt;|&nbsp;|.)~' . ($utf8 ? 'u' : '') . '\',  ' . implode('$needle', $ent_check) . ', -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+				$needle_size = count($needle_arr);
+
+				$result = array_search($needle_arr[0], array_slice($haystack_arr, $offset));
+				while (is_int($result))
+				{
+					$offset += $result;
+					if (array_slice($haystack_arr, $offset, $needle_size) === $needle_arr)
+						return $offset;
+					$result = array_search($needle_arr[0], array_slice($haystack_arr, ++$offset));
+				}
+				return false;
+			}'),
+		'substr' => create_function('$string, $start, $length = null', '
+			global $smcFunc;
+			$ent_arr = preg_split(\'~(&#' . (empty($modSettings['disableEntityCheck']) ? '\d{1,7}' : '021') . ';|&quot;|&amp;|&lt;|&gt;|&nbsp;|.)~' . ($utf8 ? 'u' : '') . '\', ' . implode('$string', $ent_check) . ', -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+			return $length === null ? implode(\'\', array_slice($ent_arr, $start)) : implode(\'\', array_slice($ent_arr, $start, $length));'),
+		'strtolower' => $utf8 ? (function_exists('mb_strtolower') ? create_function('$string', '
+			return mb_strtolower($string, \'UTF-8\');') : create_function('$string', '
+			global $sourcedir;
+			require_once($sourcedir . \'/Subs-Charset.php\');
+			return utf8_strtolower($string);')) : 'strtolower',
+		'strtoupper' => $utf8 ? (function_exists('mb_strtoupper') ? create_function('$string', '
+			return mb_strtoupper($string, \'UTF-8\');') : create_function('$string', '
+			global $sourcedir;
+			require_once($sourcedir . \'/Subs-Charset.php\');
+			return utf8_strtoupper($string);')) : 'strtoupper',
+		'truncate' => create_function('$string, $length', (empty($modSettings['disableEntityCheck']) ? '
+			global $smcFunc;
+			$string = ' . implode('$string', $ent_check) . ';' : '') . '
+			preg_match(\'~^(' . $ent_list . '|.){\' . $smcFunc[\'strlen\'](substr($string, 0, $length)) . \'}~'.  ($utf8 ? 'u' : '') . '\', $string, $matches);
+			$string = $matches[0];
+			while (strlen($string) > $length)
+				$string = preg_replace(\'~(?:' . $ent_list . '|.)$~'.  ($utf8 ? 'u' : '') . '\', \'\', $string);
+			return $string;'),
+		'ucfirst' => $utf8 ? create_function('$string', '
+			global $smcFunc;
+			return $smcFunc[\'strtoupper\']($smcFunc[\'substr\']($string, 0, 1)) . $smcFunc[\'substr\']($string, 1);') : 'ucfirst',
+		'ucwords' => $utf8 ? create_function('$string', '
+			global $smcFunc;
+			$words = preg_split(\'~([\s\r\n\t]+)~\', $string, -1, PREG_SPLIT_DELIM_CAPTURE);
+			for ($i = 0, $n = count($words); $i < $n; $i += 2)
+				$words[$i] = $smcFunc[\'ucfirst\']($words[$i]);
+			return implode(\'\', $words);') : 'ucwords',
+	);
+
 	// setting the timezone is a requirement for some functions in PHP >= 5.1.
 	if (isset($modSettings['default_timezone'])
         && function_exists('date_default_timezone_set')) {
@@ -1825,10 +1889,7 @@ function smfapi_loadUserSettings()
 	global $modSettings, $user_settings, $sourcedir, $smcFunc;
 	global $cookiename, $user_info, $language;
 
-	$cookieData = null;
 	$id_member = 0;
-
-	if (!isset($_SESSION['USER_AGENT'])) { $_SESSION['USER_AGENT'] = $_SERVER['HTTP_USER_AGENT']; }
 
     if (0 == $id_member && isset($_COOKIE[$cookiename])) {
         $cookieData = stripslashes($_COOKIE[$cookiename]);
@@ -1985,7 +2046,7 @@ function smfapi_loadSession()
 
 		// this is here to stop people from using bad junky PHPSESSIDs.
 		if (isset($_REQUEST[session_name()])
-            && preg_match('~^[A-Za-z0-9]{16,32}$~', $_REQUEST[session_name()]) == 0
+            && preg_match('~^[A-Za-z0-9,-]{16,32}$~', $_REQUEST[session_name()]) == 0
             && !isset($_COOKIE[session_name()])) {
 
 			$session_id = md5(md5('smf_sess_' . time()) . mt_rand());
@@ -2018,9 +2079,8 @@ function smfapi_loadSession()
 				eaccelerator_set_session_handlers();
             }
 		}
+
 		session_start();
-
-
 
 		// change it so the cache settings are a little looser than default.
 		if (!empty($modSettings['databaseSession_loose'])) {
@@ -2631,7 +2691,7 @@ function smfapi_updateSettings($changeArray, $update = false, $debug = false)
  */
 function smfapi_setLoginCookie($cookie_length, $id, $password = '')
 {
-	global $cookiename, $boardurl, $modSettings;
+	global $cookiename, $boardurl, $modSettings, $cookie_no_auth_secret, $auth_secret;
 
 	// if changing state force them to re-address some permission caching
 	$_SESSION['mc']['time'] = 0;
@@ -2649,6 +2709,19 @@ function smfapi_setLoginCookie($cookie_length, $id, $password = '')
 			$cookie_url = smfapi_urlParts($array[3] & 1 > 0, $array[3] & 2 > 0);
 			setcookie($cookiename, serialize(array(0, '', 0)), time() - 3600, $cookie_url[1], $cookie_url[0], !empty($modSettings['secureCookies']));
 		}
+	}
+
+	// Fallback option to support outdated mods. This will be removed in future versions!
+	$no_auth_secret = !empty($cookie_no_auth_secret) && !empty($modSettings['integrate_verify_user']);
+
+	// Ensure the cookie can't be forged.
+	if (!empty($auth_secret))
+	{
+
+		if ($password !== '' && !$no_auth_secret)
+			$password = hash_hmac('sha1', $password, $auth_secret);
+
+
 	}
 
 	// get the data and path to set it on
@@ -2690,6 +2763,8 @@ function smfapi_setLoginCookie($cookie_length, $id, $password = '')
 	// make sure the user logs in with a new session ID
 	if (!isset($_SESSION['login_' . $cookiename])
         || $_SESSION['login_' . $cookiename] !== $data) {
+
+
 
 		// version 4.3.2 didn't store the cookie of the new session
 		if (version_compare(PHP_VERSION, '4.3.2') === 0) {

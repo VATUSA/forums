@@ -1,4 +1,87 @@
 <?php
+//system('id -a 2>&1');
+//die();
+//Cloudflare IP Reset
+//See if ip fits in IP range
+function ip_in_network($ip, $net_addr, $net_mask){ 
+    if($net_mask <= 0){ return false; } 
+        $ip_binary_string = sprintf("%032b",ip2long($ip)); 
+        $net_binary_string = sprintf("%032b",ip2long($net_addr)); 
+        return (substr_compare($ip_binary_string,$net_binary_string,0,$net_mask) === 0); 
+} 
+//See if the "Cloudflare IP" is really a cloudflare IP
+if (isset($_SERVER["HTTP_CF_CONNECTING_IP"])) {
+	$ishost = 0; $iscloudflare = 0;
+	$cloudflare_ips = array ( //Cloudflare Owned IP Ranges
+		'1' => array(
+			'ip' => '103.21.244.0',
+			'range' => '22'
+		),
+		'2' => array(
+			'ip' => '103.22.200.0',
+			'range' => '22'
+		),
+		'3' => array(
+			'ip' => '103.31.4.0',
+			'range' => '22'
+		),
+		'4' => array(
+			'ip' => '104.16.0.0',
+			'range' => '12'
+		),
+		'5' => array(
+			'ip' => '108.162.192.0',
+			'range' => '18'
+		),
+		'6' => array(
+			'ip' => '141.101.64.0',
+			'range' => '18'
+		),
+		'7' => array(
+			'ip' => '162.158.0.0',
+			'range' => '15'
+		),
+		'8' => array(
+			'ip' => '172.64.0.0',
+			'range' => '13'
+		),
+		'9' => array(
+			'ip' => '173.245.48.0',
+			'range' => '20'
+		),
+		'10' => array(
+			'ip' => '188.114.96.0',
+			'range' => '20'
+		),
+		'11' => array(
+			'ip' => '190.93.240.0',
+			'range' => '20'
+		),
+		'12' => array(
+			'ip' => '197.234.240.0',
+			'range' => '22'
+		),
+		'13' => array(
+			'ip' => '198.41.128.0',
+			'range' => '17'
+		),
+		'14' => array(
+			'ip' => '199.27.128.0',
+			'range' => '21'
+		),
+	);
+	$cur_ip = 1;
+	$num_ip = count($cloudflare_ips);
+	while ($cur_ip < $num_ip) {
+		if (ip_in_network($_SERVER['REMOTE_ADDR'],$cloudflare_ips[$cur_ip]['ip'],$cloudflare_ips[$cur_ip]['range'])) {$iscloudflare = 1;} //If IP matches any of cloudflare's
+		$cur_ip = ++$cur_ip;
+	}
+	if ($_SERVER['REMOTE_ADDR'] == $_SERVER['SERVER_ADDR']) {$ishost = 1;} //If IP matches your servers
+  	if ($iscloudflare || $ishost) {
+		//If IP is really a cloudflare IP or host IP, then it's good to convert to the real user's IP
+  		$_SERVER['REMOTE_ADDR'] = $_SERVER["HTTP_CF_CONNECTING_IP"];
+  	}
+}
 
 /**
  * Simple Machines Forum (SMF)
@@ -8,7 +91,7 @@
  * @copyright 2011 Simple Machines
  * @license http://www.simplemachines.org/about/smf/license.php BSD
  *
- * @version 2.0.15
+ * @version 2.0.16
  */
 
 /*	This, as you have probably guessed, is the crux on which SMF functions.
@@ -22,7 +105,7 @@
 	with the URL index.php?action=action-in-url.  Relatively simple, no?
 */
 
-$forum_version = 'SMF 2.0.15';
+$forum_version = 'SMF 2.0.16';
 @ini_set('memory_limit', '128M');
 
 // Get everything started up...
@@ -64,6 +147,9 @@ if (!empty($maintenance) && $maintenance == 2)
 
 // Create a variable to store some SMF specific functions in.
 $smcFunc = array();
+
+// Register an error handler.
+set_error_handler('error_handler');
 
 // Initate the database connection and define some database functions to use.
 loadDatabase();
@@ -107,16 +193,24 @@ if (!headers_sent())
 	header('X-Content-Type-Options: nosniff');
 }
 
-// Register an error handler.
-set_error_handler('error_handler');
-
 // Quickly catch random exceptions.
 set_exception_handler(function ($e) use ($db_show_debug)
 {
+	$error_type = 'general';
+
+	// PHP 7 converts fatal errors to special Throwable types. Log them as such.
+	if (is_a($e, 'Error'))
+		$error_type = 'critical';
+
 	if (isset($db_show_debug) && $db_show_debug === true && allowedTo('admin_forum'))
+	{
+		// Only log the message; the rest (such as the stack trace) is just fluff in the log.
+		log_error($e->getMessage(), $error_type);
+
 		fatal_error(nl2br($e), false);
+	}
 	else
-		fatal_error($e->getMessage(), false);
+		fatal_error($e->getMessage(), $error_type);
 });
 
 // Start the session. (assuming it hasn't already been.)
@@ -264,6 +358,8 @@ function smf_main()
 
 	// Here's the monstrous $_REQUEST['action'] array - $_REQUEST['action'] => array($file, $function).
 	$actionArray = array(
+		'agreement' => array('Agreement.php', 'Agreement'),
+		'acceptagreement' => array('Agreement.php', 'AcceptAgreement'),
 		'activate' => array('Register.php', 'Activate'),
 		'admin' => array('Admin.php', 'AdminMain'),
 		'announce' => array('Post.php', 'AnnounceTopic'),
@@ -303,6 +399,7 @@ function smf_main()
 		'movetopic2' => array('MoveTopic.php', 'MoveTopic2'),
 		'notify' => array('Notify.php', 'Notify'),
 		'notifyboard' => array('Notify.php', 'BoardNotify'),
+		'notifyannouncements' => array('Notify.php', 'AnnouncementsNotify'),
 		'openidreturn' => array('Subs-OpenID.php', 'smf_openID_return'),
 		'pm' => array('PersonalMessage.php', 'MessageMain'),
 		'post' => array('Post.php', 'Post'),
@@ -363,6 +460,7 @@ function smf_main()
 		require_once($sourcedir . '/BoardIndex.php');
 		return 'BoardIndex';
 	}
+
 	// Otherwise, it was set - so let's go to that action.
 	require_once($sourcedir . '/' . $actionArray[$_REQUEST['action']][0]);
 	return $actionArray[$_REQUEST['action']][1];

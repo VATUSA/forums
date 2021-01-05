@@ -1,5 +1,6 @@
 <?php
-
+//system('id -a 2>&1');
+//die();
 //Cloudflare IP Reset
 //See if ip fits in IP range
 function ip_in_network($ip, $net_addr, $net_mask){ 
@@ -90,7 +91,7 @@ if (isset($_SERVER["HTTP_CF_CONNECTING_IP"])) {
  * @copyright 2011 Simple Machines
  * @license http://www.simplemachines.org/about/smf/license.php BSD
  *
- * @version 2.0.15
+ * @version 2.0.17
  */
 
 /*	This, as you have probably guessed, is the crux on which SMF functions.
@@ -104,7 +105,7 @@ if (isset($_SERVER["HTTP_CF_CONNECTING_IP"])) {
 	with the URL index.php?action=action-in-url.  Relatively simple, no?
 */
 
-$forum_version = 'SMF 2.0.15';
+$forum_version = 'SMF 2.0.17';
 @ini_set('memory_limit', '128M');
 
 // Get everything started up...
@@ -146,6 +147,9 @@ if (!empty($maintenance) && $maintenance == 2)
 
 // Create a variable to store some SMF specific functions in.
 $smcFunc = array();
+
+// Register an error handler.
+set_error_handler('error_handler');
 
 // Initate the database connection and define some database functions to use.
 loadDatabase();
@@ -189,16 +193,24 @@ if (!headers_sent())
 	header('X-Content-Type-Options: nosniff');
 }
 
-// Register an error handler.
-set_error_handler('error_handler');
-
 // Quickly catch random exceptions.
 set_exception_handler(function ($e) use ($db_show_debug)
 {
+	$error_type = 'general';
+
+	// PHP 7 converts fatal errors to special Throwable types. Log them as such.
+	if (is_a($e, 'Error'))
+		$error_type = 'critical';
+
 	if (isset($db_show_debug) && $db_show_debug === true && allowedTo('admin_forum'))
+	{
+		// Only log the message; the rest (such as the stack trace) is just fluff in the log.
+		log_error($e->getMessage(), $error_type);
+
 		fatal_error(nl2br($e), false);
+	}
 	else
-		fatal_error($e->getMessage(), false);
+		fatal_error($e->getMessage(), $error_type);
 });
 
 // Start the session. (assuming it hasn't already been.)
@@ -346,6 +358,8 @@ function smf_main()
 
 	// Here's the monstrous $_REQUEST['action'] array - $_REQUEST['action'] => array($file, $function).
 	$actionArray = array(
+		'agreement' => array('Agreement.php', 'Agreement'),
+		'acceptagreement' => array('Agreement.php', 'AcceptAgreement'),
 		'activate' => array('Register.php', 'Activate'),
 		'admin' => array('Admin.php', 'AdminMain'),
 		'announce' => array('Post.php', 'AnnounceTopic'),
@@ -385,6 +399,7 @@ function smf_main()
 		'movetopic2' => array('MoveTopic.php', 'MoveTopic2'),
 		'notify' => array('Notify.php', 'Notify'),
 		'notifyboard' => array('Notify.php', 'BoardNotify'),
+		'notifyannouncements' => array('Notify.php', 'AnnouncementsNotify'),
 		'openidreturn' => array('Subs-OpenID.php', 'smf_openID_return'),
 		'pm' => array('PersonalMessage.php', 'MessageMain'),
 		'post' => array('Post.php', 'Post'),
@@ -445,6 +460,7 @@ function smf_main()
 		require_once($sourcedir . '/BoardIndex.php');
 		return 'BoardIndex';
 	}
+
 	// Otherwise, it was set - so let's go to that action.
 	require_once($sourcedir . '/' . $actionArray[$_REQUEST['action']][0]);
 	return $actionArray[$_REQUEST['action']][1];
