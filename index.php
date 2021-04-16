@@ -27,7 +27,7 @@ if (isset($_SERVER["HTTP_CF_CONNECTING_IP"])) {
 		),
 		'4' => array(
 			'ip' => '104.16.0.0',
-			'range' => '12'
+			'range' => '13'
 		),
 		'5' => array(
 			'ip' => '108.162.192.0',
@@ -66,9 +66,13 @@ if (isset($_SERVER["HTTP_CF_CONNECTING_IP"])) {
 			'range' => '17'
 		),
 		'14' => array(
-			'ip' => '199.27.128.0',
-			'range' => '21'
+			'ip' => '131.0.72.0',
+			'range' => '22'
 		),
+		'15' => array(
+			'ip' => '104.24.0.0',
+			'range' => '14'
+		)
 	);
 	$cur_ip = 1;
 	$num_ip = count($cloudflare_ips);
@@ -91,7 +95,7 @@ if (isset($_SERVER["HTTP_CF_CONNECTING_IP"])) {
  * @copyright 2011 Simple Machines
  * @license http://www.simplemachines.org/about/smf/license.php BSD
  *
- * @version 2.0.17
+ * @version 2.0.18
  */
 
 /*	This, as you have probably guessed, is the crux on which SMF functions.
@@ -105,12 +109,12 @@ if (isset($_SERVER["HTTP_CF_CONNECTING_IP"])) {
 	with the URL index.php?action=action-in-url.  Relatively simple, no?
 */
 
-$forum_version = 'SMF 2.0.17';
+$forum_version = 'SMF 2.0.18';
 @ini_set('memory_limit', '128M');
 
 // Get everything started up...
 define('SMF', 1);
-if (function_exists('set_magic_quotes_runtime'))
+if (version_compare(PHP_VERSION, '7.4.0') == -1 && function_exists('set_magic_quotes_runtime'))
 	@set_magic_quotes_runtime(0);
 error_reporting(defined('E_STRICT') ? E_ALL | E_STRICT : E_ALL);
 $time_start = microtime();
