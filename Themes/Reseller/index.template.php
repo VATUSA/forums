@@ -212,7 +212,7 @@ function template_body_above()
 	<div class="container">
 		<div class="row">
 			<div class="col-md-9">
-				<a href="', $scripturl, '"><img src="https://www.vatusa.net/img/logo-light.png" style="height: 75px;" alt="' . $context['forum_name'] . '" /></a>
+				<a href="', $scripturl, '"><img src="https://www.vatusa.net/img/logo-full.png" style="height: 70px;" alt="' . $context['forum_name'] . '" /></a>
 			</div>
 			<div class="col-md-3">';
 			if ($context['user']['is_logged'])
