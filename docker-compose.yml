@@ -1,0 +1,7 @@
+version: '3.9'
+services:
+  forums:
+    build: .
+    image: vatusa/forums
+    ports:
+      - 80:80
