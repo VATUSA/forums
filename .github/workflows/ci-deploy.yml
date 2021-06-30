@@ -12,13 +12,15 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    env:
-      SHA8: ${GITHUB_SHA::8}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+      
+      - name: Set outputs
+        id: vars
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
 
       - name: Build Docker Image
         run: docker-compose build --no-cache
@@ -31,12 +33,12 @@ jobs:
 
       - name: Push to Docker Hub
         run: |
-          docker tag vatusa/forums vatusa/forums:$SHA8
-          docker push vatusa/forums:$SHA8
+          docker tag vatusa/forums vatusa/forums:${{ steps.vars.outputs.sha_short }}
+          docker push vatusa/forums:${{ steps.vars.outputs.sha_short }}
 
       - name: Deploy to Kubernetes Cluster
         uses: actions-hub/kubectl@master
         env:
           KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
         with:
-          args: set image deployment/forums *=vatusa/forums:${{env.SHA8}}} -n web
+          args: set image deployment/forums *=vatusa/forums:${{ steps.vars.outputs.sha_short }} -n web
