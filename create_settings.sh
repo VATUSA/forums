@@ -65,3 +65,5 @@ ${DOLLAR}image_proxy_enabled = 0;
 ${DOLLAR}auth_secret = '${FORUM_AUTH_SECRET}';
 
 EOF
+
+echo $FORUM_KEY > forum.key
