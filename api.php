@@ -4,7 +4,7 @@ require("smf_2_api.php");
 if ($_REQUEST['login'] == 1) {
   $token = $_REQUEST['token'];
   $signature = $_REQUEST['signature'];
-  if ($signature != base64url_encode(hash_hmac("sha512", $token, base64_decode(file_get_contents("/home/vatusa/forum.key"))))) {
+  if ($signature != base64url_encode(hash_hmac("sha512", $token, base64_decode(file_get_contents("forum.key"))))) {
     echo "Bad token\n"; exit;
   }
 
@@ -23,7 +23,7 @@ if ($_REQUEST['login'] == 1) {
   $data = $_REQUEST['data'];
   $signature = $_REQUEST['signature'];
 
-  if ($signature != base64url_encode(hash_hmac("sha512", $data, base64_decode(file_get_contents("/home/vatusa/forum.key"))))) {
+  if ($signature != base64url_encode(hash_hmac("sha512", $data, base64_decode(file_get_contents("forum.key"))))) {
     echo "Bad data\n"; exit;
   }
 
