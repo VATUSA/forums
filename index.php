@@ -1,6 +1,4 @@
 <?php
-//system('id -a 2>&1');
-//die();
 //Cloudflare IP Reset
 //See if ip fits in IP range
 function ip_in_network($ip, $net_addr, $net_mask){ 
@@ -77,10 +75,10 @@ if (isset($_SERVER["HTTP_CF_CONNECTING_IP"])) {
 	$cur_ip = 1;
 	$num_ip = count($cloudflare_ips);
 	while ($cur_ip < $num_ip) {
-		if (ip_in_network($_SERVER['REMOTE_ADDR'],$cloudflare_ips[$cur_ip]['ip'],$cloudflare_ips[$cur_ip]['range'])) {$iscloudflare = 1;} //If IP matches any of cloudflare's
+		if (ip_in_network(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[1] ?? '',$cloudflare_ips[$cur_ip]['ip'],$cloudflare_ips[$cur_ip]['range'])) {$iscloudflare = 1;} //If IP matches any of cloudflare's
 		$cur_ip = ++$cur_ip;
 	}
-	if ($_SERVER['REMOTE_ADDR'] == $_SERVER['SERVER_ADDR']) {$ishost = 1;} //If IP matches your servers
+	if (explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[1] ?? '' == $_SERVER['SERVER_ADDR']) {$ishost = 1;} //If IP matches your servers
   	if ($iscloudflare || $ishost) {
 		//If IP is really a cloudflare IP or host IP, then it's good to convert to the real user's IP
   		$_SERVER['REMOTE_ADDR'] = $_SERVER["HTTP_CF_CONNECTING_IP"];
