@@ -557,6 +557,26 @@ function loadUserSettings()
 		}
 	}
 
+	/* Add support for Reverse Proxy
+	 * I am not happy with this, but SMF 2.0 does not support IPv6 or reverse proxying
+	 * and Cloudflare's proxy does not allow disabling of IPv6, so we
+	 * either bork IP addresses in total with this, or we customize much more
+	 * of SMF to support IPv6 or remove IP logging entirely. -Daniel
+	 */
+	if (!empty($_SERVER['REMOTE_ADDR'])) {
+		$ip = $_SERVER['REMOTE_ADDR'];
+	} else {
+		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		if (preg_match("/, /", $ip)) {
+			$ips = explode(", ", $ip);
+			$ip = $ips[count($ips)-1];
+			// Failsafe IPv6 check, see above comment block
+			if (strpos($ip, ':') !== false) {
+				$ip = '127.0.0.1';
+			}
+		}
+	}
+
 	// Set up the $user_info array.
 	$user_info += array(
 		'id' => $id_member,
@@ -569,7 +589,7 @@ function loadUserSettings()
 		'is_admin' => in_array(1, $user_info['groups']),
 		'theme' => empty($user_settings['id_theme']) ? 0 : $user_settings['id_theme'],
 		'last_login' => empty($user_settings['last_login']) ? 0 : $user_settings['last_login'],
-		'ip' => $_SERVER['REMOTE_ADDR'],
+		'ip' => $ip,
 		'ip2' => $_SERVER['BAN_CHECK_IP'],
 		'posts' => empty($user_settings['posts']) ? 0 : $user_settings['posts'],
 		'time_format' => empty($user_settings['time_format']) ? $modSettings['time_format'] : $user_settings['time_format'],
