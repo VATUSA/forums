@@ -32,6 +32,8 @@ RUN	addgroup -S application && adduser -SG application application && \
 	apk del tzdata && \
 	rm -rf /var/cache/apk/*
 
+RUN docker-php-ext-install pdo_mysql
+
 WORKDIR /www
 COPY . /www
 COPY docker /
