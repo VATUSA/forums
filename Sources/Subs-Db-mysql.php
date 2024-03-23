@@ -24,70 +24,10 @@ if (!defined('SMF'))
 // Initialize the database settings
 function smf_db_initiate($db_server, $db_name, $db_user, $db_passwd, $db_prefix, $db_options = array())
 {
-	global $smcFunc, $mysql_set_mode, $sourcedir;
+    $db = new SMF_DB_MySQLi;
 
-	// Check for MySQLi first...
-	// !!! This driver does not work on PHP < 5.4.0.
-	if (function_exists('mysqli_connect') && version_compare(PHP_VERSION, '5.4') >= 0)
-	{
-		$db = new SMF_DB_MySQLi;
-
-		// Delegate control over to the new database driver.
-		return $db->initiate($db_server, $db_name, $db_user, $db_passwd, $db_prefix, $db_options);
-	}
-
-	// Map some database specific functions, only do this once.
-	if (!isset($smcFunc['db_fetch_assoc']) || $smcFunc['db_fetch_assoc'] != 'mysql_fetch_assoc')
-		$smcFunc += array(
-			'db_query' => 'smf_db_query',
-			'db_quote' => 'smf_db_quote',
-			'db_fetch_assoc' => 'mysql_fetch_assoc',
-			'db_fetch_row' => 'mysql_fetch_row',
-			'db_free_result' => 'mysql_free_result',
-			'db_insert' => 'smf_db_insert',
-			'db_insert_id' => 'smf_db_insert_id',
-			'db_num_rows' => 'mysql_num_rows',
-			'db_data_seek' => 'mysql_data_seek',
-			'db_num_fields' => 'mysql_num_fields',
-			'db_escape_string' => 'addslashes',
-			'db_unescape_string' => 'stripslashes',
-			'db_server_info' => 'mysql_get_server_info',
-			'db_affected_rows' => 'smf_db_affected_rows',
-			'db_transaction' => 'smf_db_transaction',
-			'db_error' => 'mysql_error',
-			'db_select_db' => 'mysql_select_db',
-			'db_title' => 'MySQL',
-			'db_sybase' => false,
-			'db_case_sensitive' => false,
-			'db_escape_wildcard_string' => 'smf_db_escape_wildcard_string',
-		);
-
-	if (!empty($db_options['persist']))
-		$connection = @mysql_pconnect($db_server, $db_user, $db_passwd);
-	else
-		$connection = @mysql_connect($db_server, $db_user, $db_passwd);
-
-	// Something's wrong, show an error if its fatal (which we assume it is)
-	if (!$connection)
-	{
-		if (!empty($db_options['non_fatal']))
-			return null;
-		else
-			db_fatal_error();
-	}
-
-	// Select the database, unless told not to
-	if (empty($db_options['dont_select_db']) && !@mysql_select_db($db_name, $connection) && empty($db_options['non_fatal']))
-		db_fatal_error();
-
-	// This makes it possible to have SMF automatically change the sql_mode and autocommit if needed.
-	if (isset($mysql_set_mode) && $mysql_set_mode === true)
-		$smcFunc['db_query']('', 'SET sql_mode = \'\', AUTOCOMMIT = 1',
-		array(),
-		false
-	);
-
-	return $connection;
+    // Delegate control over to the new database driver.
+    return $db->initiate($db_server, $db_name, $db_user, $db_passwd, $db_prefix, $db_options);
 }
 
 // Extend the database functionality.

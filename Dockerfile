@@ -33,6 +33,7 @@ RUN	addgroup -S application && adduser -SG application application && \
 	rm -rf /var/cache/apk/*
 
 RUN docker-php-ext-install pdo_mysql
+RUN docker-php-ext-install mysqli
 
 WORKDIR /www
 COPY . /www
