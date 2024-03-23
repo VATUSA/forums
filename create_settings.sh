@@ -39,7 +39,7 @@ ${DOLLAR}ssi_db_user = '';
 ${DOLLAR}ssi_db_passwd = '';
 ${DOLLAR}db_prefix = 'smf_';
 ${DOLLAR}db_persist = 0;
-${DOLLAR}db_error_send = 1;
+${DOLLAR}db_error_send = 0;
 
 ########## Directories/Files ##########
 # Note: These directories do not have to be changed unless you move things.
