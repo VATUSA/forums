@@ -231,7 +231,7 @@ function template_body_above()
 			else
 			{
 			echo'
-				<a href="https://login.vatusa.net" class="btn btn-success" style="color: #fff">Login</a>';
+				<a href="https://login.vatusa.net/?forums" class="btn btn-success" style="color: #fff">Login</a>';
 			}
 			echo'
 			</div>

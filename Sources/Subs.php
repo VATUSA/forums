@@ -4097,7 +4097,7 @@ function setupMenuContext()
 			'login' => array(
 				'title' => $txt['login'],
 				//'href' => $scripturl . '?action=login',
-                'href' => 'https://login.vatusa.net/?return=forums',
+                'href' => 'https://login.vatusa.net/?forums',
 				'show' => $user_info['is_guest'],
 				'sub_buttons' => array(
 				),

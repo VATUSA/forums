@@ -89,7 +89,7 @@ function Login()
 	else
 		unset($_SESSION['login_url']);
 */
-    header("Location: https://login.vatusa.net");
+    header("Location: https://login.vatusa.net?forums");
 }
 
 // Perform the actual logging-in.
