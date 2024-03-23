@@ -1,4 +1,4 @@
-FROM php:7.2.34-fpm-alpine3.12
+FROM php:8.1-fpm-alpine
 
 ENV TIMEZONE            America/Chicago
 ENV PHP_MEMORY_LIMIT    128M
