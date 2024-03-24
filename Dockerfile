@@ -6,6 +6,8 @@ ENV MAX_UPLOAD          20M
 ENV PHP_MAX_FILE_UPLOAD 200
 ENV PHP_MAX_POST       100M
 
+COPY docker /
+
 RUN	addgroup -S application && adduser -SG application application && \
 	apk update && \
 	apk upgrade && \
@@ -37,7 +39,6 @@ RUN docker-php-ext-install mysqli
 
 WORKDIR /www
 COPY . /www
-COPY docker /
 
 ENTRYPOINT ["/bin/sh","/www/build.sh"]
 
