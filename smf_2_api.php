@@ -1794,7 +1794,7 @@ function smfapi_reloadSettings()
 	// preg_replace can handle complex characters only for higher PHP versions.
 	$space_chars = $utf8 ? (@version_compare(PHP_VERSION, '4.3.3') != -1 ? '\x{A0}\x{AD}\x{2000}-\x{200F}\x{201F}\x{202F}\x{3000}\x{FEFF}' : "\xC2\xA0\xC2\xAD\xE2\x80\x80-\xE2\x80\x8F\xE2\x80\x9F\xE2\x80\xAF\xE2\x80\x9F\xE3\x80\x80\xEF\xBB\xBF") : '\x00-\x08\x0B\x0C\x0E-\x19\xA0';
 
-	$smcFunc += array(
+	/*$smcFunc += array(
 		'entity_fix' => create_function('$string', '
 			$num = substr($string, 0, 1) === \'x\' ? hexdec(substr($string, 1)) : (int) $string;
 			return $num < 0x20 || $num > 0x10FFFF || ($num >= 0xD800 && $num <= 0xDFFF) || $num == 0x202E ? \'\' : \'&#\' . $num . \';\';'),
@@ -1862,7 +1862,7 @@ function smfapi_reloadSettings()
 			for ($i = 0, $n = count($words); $i < $n; $i += 2)
 				$words[$i] = $smcFunc[\'ucfirst\']($words[$i]);
 			return implode(\'\', $words);') : 'ucwords',
-	);
+	);*/
 
 	// setting the timezone is a requirement for some functions in PHP >= 5.1.
 	if (isset($modSettings['default_timezone'])
