@@ -31,8 +31,8 @@ jobs:
 
       - name: Push to Docker Hub
         run: |
-          docker tag vatusa/forums vatusa/forums:${{ steps.vars.outputs.sha_short }}
-          docker push vatusa/forums:${{ steps.vars.outputs.sha_short }}
+          docker tag vatusa/forums vatusa/forums:${{ github.sha }}
+          docker push vatusa/forums:${{ github.sha }}
 
   deploy-dev:
     name: Deploy dev to ArgoCD
@@ -50,14 +50,14 @@ jobs:
       - name: Update manifests
         run: |
           cd $GITHUB_WORKSPACE/gitops/current
-          kustomize edit set image vatusa/forums=vatusa/forums:${{ steps.vars.outputs.sha_short }}
+          kustomize edit set image vatusa/forums=vatusa/forums:${{ github.sha }}
       - name: Commit and push changes
         run: |
           cd $GITHUB_WORKSPACE/gitops
           git config --global user.email "vatusa6@vatusa.net"
           git config --global user.name "VATUSA6"
           git add .
-          git commit -m "Update forums image tag to ${{ steps.vars.outputs.sha_short }}"
+          git commit -m "Update forums image tag to ${{ github.sha }}
       - name: Push to gitops repo
         run: |
           cd $GITHUB_WORKSPACE/gitops
