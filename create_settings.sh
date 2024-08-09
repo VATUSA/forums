@@ -35,6 +35,7 @@ ${DOLLAR}db_server = '$DB_HOST';
 ${DOLLAR}db_name = '$DB_DATABASE';
 ${DOLLAR}db_user = '$DB_USERNAME';
 ${DOLLAR}db_passwd = '$DB_PASSWORD';
+${DOLLAR}db_port = '$DB_PORT';
 ${DOLLAR}ssi_db_user = '';
 ${DOLLAR}ssi_db_passwd = '';
 ${DOLLAR}db_prefix = 'smf_';

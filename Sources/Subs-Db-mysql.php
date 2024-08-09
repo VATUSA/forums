@@ -22,12 +22,12 @@ if (!defined('SMF'))
 */
 
 // Initialize the database settings
-function smf_db_initiate($db_server, $db_name, $db_user, $db_passwd, $db_prefix, $db_options = array())
+function smf_db_initiate($db_server, $db_name, $db_user, $db_passwd, $db_port, $db_prefix, $db_options = array())
 {
     $db = new SMF_DB_MySQLi;
 
     // Delegate control over to the new database driver.
-    return $db->initiate($db_server, $db_name, $db_user, $db_passwd, $db_prefix, $db_options);
+    return $db->initiate($db_server, $db_name, $db_user, $db_passwd, $db_port, $db_prefix, $db_options);
 }
 
 // Extend the database functionality.
@@ -686,19 +686,19 @@ function smf_db_escape_wildcard_string($string, $translate_human_wildcards=false
 }
 class SMF_DB_MySQLi
 {
-	/**
-	 *  Maps the implementations in this file ($this->function_name)
-	 *  to the $smcFunc['db_function_name'] variable.
-	 *
-	 * @param string $db_server
-	 * @param string $db_name
-	 * @param string $db_user
-	 * @param string $db_passwd
-	 * @param string $db_prefix
-	 * @param array $db_options
-	 * @return null
-	 */
-	public function initiate($db_server, $db_name, $db_user, $db_passwd, $db_prefix, $db_options = array())
+    /**
+     *  Maps the implementations in this file ($this->function_name)
+     *  to the $smcFunc['db_function_name'] variable.
+     *
+     * @param string $db_server
+     * @param string $db_name
+     * @param string $db_user
+     * @param string $db_passwd
+     * @param string $db_prefix
+     * @param array $db_options
+     * @return null
+     */
+	public function initiate($db_server, $db_name, $db_user, $db_passwd, $db_port, $db_prefix, $db_options = array())
 	{
 		global $smcFunc, $mysql_set_mode;
 
@@ -729,9 +729,9 @@ class SMF_DB_MySQLi
 			);
 
 		if (!empty($db_options['persist']))
-			$connection = @mysqli_connect('p:' . $db_server, $db_user, $db_passwd);
+			$connection = @mysqli_connect('p:' . $db_server, $db_user, $db_passwd, $db_name, $db_port);
 		else
-			$connection = @mysqli_connect($db_server, $db_user, $db_passwd);
+			$connection = @mysqli_connect($db_server, $db_user, $db_passwd, $db_name, $db_port);
 
 		// Something's wrong, show an error if its fatal (which we assume it is)
 		if (!$connection)
