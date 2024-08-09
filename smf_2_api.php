@@ -2285,7 +2285,7 @@ function smfapi_sessionGC($max_lifetime)
  */
 function smfapi_loadDatabase()
 {
-	global $db_persist, $db_connection, $db_server, $db_user, $db_passwd;
+	global $db_persist, $db_connection, $db_server, $db_user, $db_passwd, $db_port;
 	global $db_type, $db_name, $sourcedir, $db_prefix;
 
 	// figure out what type of database we are using.
@@ -2298,7 +2298,7 @@ function smfapi_loadDatabase()
 
 	// make connection
 	if (empty($db_connection)) {
-		$db_connection = smf_db_initiate($db_server, $db_name, $db_user, $db_passwd, $db_prefix, array('persist' => $db_persist, 'dont_select_db' => SMF == 'API'));
+		$db_connection = smf_db_initiate($db_server, $db_name, $db_user, $db_passwd, $db_port, $db_prefix, array('persist' => $db_persist, 'dont_select_db' => SMF == 'API'));
     }
 
 	// safe guard here, if there isn't a valid connection lets put a stop to it.
