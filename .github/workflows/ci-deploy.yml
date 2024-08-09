@@ -57,7 +57,7 @@ jobs:
           git config --global user.email "vatusa6@vatusa.net"
           git config --global user.name "VATUSA6"
           git add .
-          git commit -m "Update forums image tag to ${{ github.sha }}
+          git commit -m "Update forums image tag to ${{ github.sha }}"
       - name: Push to gitops repo
         run: |
           cd $GITHUB_WORKSPACE/gitops
